@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Literal
 from uuid import UUID, uuid4
 
@@ -35,7 +35,7 @@ class AskResponse(BaseModel):
     status: Literal["answered", "refused", "blocked"]
     model: str | None = None
     token_usage: dict[str, int] = Field(default_factory=dict)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class ErrorResponse(BaseModel):
@@ -77,7 +77,7 @@ class AuthContext(BaseModel):
 
 
 class AppLogEvent(BaseModel):
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     request_id: str | UUID | None = None
     event: str
     status: str | None = None
