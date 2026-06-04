@@ -5,7 +5,7 @@ from functools import lru_cache
 from pathlib import Path
 
 from app.config import Settings, get_settings
-from app.models.schemas import AskResponse
+from app.models.schemas import AskResponse, RetrievalResult
 from app.rag.citation_builder import DEFAULT_CITATION_BUILDER, CitationBuilder
 from app.rag.ingest import ingest_pdf_corpus
 from app.rag.vector_store import ChunkEmbeddingStore, build_embeddings
@@ -33,9 +33,16 @@ class SecureRAGRetriever:
         self.settings = settings or get_settings()
         self.citation_builder = citation_builder or DEFAULT_CITATION_BUILDER
 
-    def answer(self, question: str, top_k: int | None = None) -> AskResponse:
+    def retrieve(self, question: str, top_k: int | None = None) -> list[RetrievalResult]:
         resolved_top_k = top_k or self.settings.top_k
-        results = self.store.search(question, resolved_top_k)
+        return self.store.search(question, resolved_top_k)
+
+    def is_in_scope(self, question: str, top_k: int | None = None) -> bool:
+        results = self.retrieve(question, top_k)
+        return bool(results) and results[0].score >= self.settings.similarity_threshold
+
+    def answer(self, question: str, top_k: int | None = None) -> AskResponse:
+        results = self.retrieve(question, top_k)
         if not results:
             return AskResponse(
                 answer="I cannot answer from the provided documents.",
