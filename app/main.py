@@ -8,6 +8,7 @@ from app.config import get_settings
 from app.middleware.auth import APIKeyAuthMiddleware
 from app.middleware.rate_limit import RateLimitMiddleware
 from app.middleware.validation import InputValidationMiddleware
+from app.services.azure_monitor import configure_azure_monitoring
 from app.services.logging_service import logging_service
 
 settings = get_settings()
@@ -39,6 +40,7 @@ app.include_router(router)
 
 @app.on_event("startup")
 async def startup_event() -> None:
+    configure_azure_monitoring(settings)
     logging_service.log_event("startup", status="ok", extra={"app_name": settings.app_name})
 
 

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import importlib
 import logging
-import os
 from concurrent.futures import ThreadPoolExecutor, TimeoutError as FutureTimeout
 from dataclasses import dataclass
 from time import sleep
@@ -10,6 +9,7 @@ from typing import Any
 
 from app.config import get_settings
 from app.models.schemas import RetrievalResult
+from app.services.azure_secrets import get_secret_manager
 from app.security.prompt_injection import DEFAULT_PROMPT_INJECTION_DETECTOR
 from app.security.system_prompt import SECURE_SYSTEM_PROMPT
 from app.services.logging_service import logging_service
@@ -109,7 +109,8 @@ class GeminiProvider:
     """
 
     def __init__(self, api_key_env: str = "GEMINI_API_KEY", model: str | None = None, max_retries: int = 2) -> None:
-        self.api_key = os.environ.get(api_key_env, "").strip()
+        secret_manager = get_secret_manager()
+        self.api_key = secret_manager.get_secret(api_key_env, env_var=api_key_env, required=True)
         if not self.api_key:
             raise LLMProviderError("Gemini API key not found in environment")
         self.model_name = model or get_settings().gemini_model

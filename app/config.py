@@ -51,8 +51,10 @@ class Settings(BaseSettings):
     request_timeout_seconds: int = Field(default=30, alias="REQUEST_TIMEOUT_SECONDS")
 
     azure_key_vault_url: str | None = Field(default=None, alias="AZURE_KEY_VAULT_URL")
+    azure_managed_identity_client_id: str | None = Field(default=None, alias="AZURE_MANAGED_IDENTITY_CLIENT_ID")
     azure_storage_account_url: str | None = Field(default=None, alias="AZURE_STORAGE_ACCOUNT_URL")
     azure_blob_container: str | None = Field(default=None, alias="AZURE_BLOB_CONTAINER")
+    azure_monitor_connection_string: str | None = Field(default=None, alias="AZURE_MONITOR_CONNECTION_STRING")
     allow_local_key_fallback: bool = Field(default=False, alias="ALLOW_LOCAL_KEY_FALLBACK")
 
     @field_validator("api_key", "gemini_api_key", mode="before")
